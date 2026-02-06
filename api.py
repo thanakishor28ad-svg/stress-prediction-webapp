@@ -12,14 +12,19 @@ def home():
 
 @app.post("/predict")
 def predict(data: dict):
+    try:
+        df = pd.DataFrame([[
+            data["WorkHours"],
+            data["SleepHours"],
+            data["HeartRate"],
+            data["ScreenTime"],
+            data["ExerciseHours"]
+        ]])
 
-    df = pd.DataFrame([{
-        "WorkHours": data["WorkHours"],
-        "SleepHours": data["SleepHours"],
-        "HeartRate": data["HeartRate"],
-        "ScreenTime": data["ScreenTime"],
-        "ExerciseHours": data["ExerciseHours"]
-    }])
+        prediction = model.predict(df)[0]
+        return {"stress_level": int(prediction)}
 
-    prediction = model.predict(df)[0]
-    return {"stress_level": int(prediction)}
+    except Exception as e:
+        return {"error": str(e)}
+
+
