@@ -1,19 +1,16 @@
 from fastapi import FastAPI
-import pandas as pd
 import joblib
+import pandas as pd
 
 app = FastAPI()
 
 model = joblib.load("stress_model.pkl")
 
-@app.get("/")
-def home():
-    return {"message": "Stress Prediction API is running"}
 
 @app.post("/predict")
 def predict(data: dict):
 
-    # Recalculate StressIndex (same logic used during training)
+    # Calculate StressIndex (6th feature)
     stress_index = (
         0.4 * data["WorkHours"] * 10 +
         0.3 * (data["HeartRate"] - 60) +
@@ -29,23 +26,18 @@ def predict(data: dict):
         "HeartRate": data["HeartRate"],
         "ScreenTime": data["ScreenTime"],
         "ExerciseHours": data["ExerciseHours"],
-        "StressIndex": stress_index   # ✅ 6th feature added
+        "StressIndex": stress_index
     }])
 
     prediction = int(model.predict(df)[0])
 
-labels = {
-    0: "Low Stress 😌",
-    1: "Medium Stress 😐",
-    2: "High Stress 😰"
-}
+    labels = {
+        0: "Low Stress 😌",
+        1: "Medium Stress 😐",
+        2: "High Stress 😰"
+    }
 
-return {
-    "stress_level": prediction,
-    "label": labels[prediction]
-}
-
-
-
-
-
+    return {
+        "stress_level": prediction,
+        "label": labels[prediction]
+    }
