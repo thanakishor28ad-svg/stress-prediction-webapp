@@ -12,19 +12,28 @@ def home():
 
 @app.post("/predict")
 def predict(data: dict):
-    try:
-        df = pd.DataFrame([[
-            data["WorkHours"],
-            data["SleepHours"],
-            data["HeartRate"],
-            data["ScreenTime"],
-            data["ExerciseHours"]
-        ]])
 
-        prediction = model.predict(df)[0]
-        return {"stress_level": int(prediction)}
+    # Recalculate StressIndex (same logic used during training)
+    stress_index = (
+        0.4 * data["WorkHours"] * 10 +
+        0.3 * (data["HeartRate"] - 60) +
+        0.2 * data["ScreenTime"] * 10 -
+        0.1 * data["SleepHours"] * 10
+    )
 
-    except Exception as e:
-        return {"error": str(e)}
+    stress_index = max(0, min(100, stress_index))
+
+    df = pd.DataFrame([{
+        "WorkHours": data["WorkHours"],
+        "SleepHours": data["SleepHours"],
+        "HeartRate": data["HeartRate"],
+        "ScreenTime": data["ScreenTime"],
+        "ExerciseHours": data["ExerciseHours"],
+        "StressIndex": stress_index   # ✅ 6th feature added
+    }])
+
+    prediction = model.predict(df)[0]
+    return {"stress_level": int(prediction)}
+
 
 
