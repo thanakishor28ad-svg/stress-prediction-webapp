@@ -32,8 +32,20 @@ def predict(data: dict):
         "StressIndex": stress_index   # ✅ 6th feature added
     }])
 
-    prediction = model.predict(df)[0]
-    return {"stress_level": int(prediction)}
+    prediction = int(model.predict(df)[0])
+
+labels = {
+    0: "Low Stress 😌",
+    1: "Medium Stress 😐",
+    2: "High Stress 😰"
+}
+
+return {
+    "stress_level": prediction,
+    "label": labels[prediction]
+}
+
+
 
 
 
